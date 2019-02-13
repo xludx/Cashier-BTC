@@ -28,9 +28,9 @@ describe('integration - storage', function () {
       let address = (new bitcore.Address(privateKey.toPublicKey())).toString()
       let data = {
         'expect': 1,
-        'currency': 'BTC',
+        'currency': 'PART',
         'exchange_rate': 1,
-        'btc_to_ask': 1,
+        'part_to_ask': 1,
         'message': 'message',
         'seller': 'testseller',
         'customer': 'testuser',
@@ -53,7 +53,7 @@ describe('integration - storage', function () {
           assert.equal(data2.customer, data.customer)
           assert.equal(data2.seller, data.seller)
           assert.equal(data2.message, data.message)
-          assert.equal(data2.btc_to_ask, data.btc_to_ask)
+          assert.equal(data2.part_to_ask, data.part_to_ask)
           assert.equal(data2.exchange_rate, data.exchange_rate)
           assert.equal(data2.currency, data.currency)
           assert.equal(data2.expect, data.expect)
@@ -105,9 +105,9 @@ describe('integration - storage', function () {
       let data = {
         'timestamp': Date.now(),
         'expect': 1,
-        'currency': 'BTC',
+        'currency': 'PART',
         'exchange_rate': 1,
-        'btc_to_ask': 1,
+        'part_to_ask': 1,
         'message': 'message',
         'seller': 'testseller',
         'customer': 'testuser',

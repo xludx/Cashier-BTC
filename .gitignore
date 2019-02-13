@@ -3,3 +3,5 @@ config.js
 qr/
 logs/
 .idea
+data/
+.DS_Store

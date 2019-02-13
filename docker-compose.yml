@@ -1,0 +1,72 @@
+version: '3.6'
+
+services:
+  app1:
+    build:
+      context: ./
+    volumes:
+      - .:/app/:delegated
+#      - ./yarn.lock:/app/yarn.lock
+#      - ./data/app1_dist:/app/dist
+      - ./data/app1:/app/data:delegated
+      - ./data/app1_node_modules:/app/node_modules:delegated
+    ports:
+      - 3100:3100
+    command: bin/entrypoint.sh
+    links:
+      - particld1
+    depends_on:
+      - particld1
+      - couchdb
+#    env_file:
+#      - .env.docker-compose
+    environment:
+      - NODE_ENV=development
+
+  couchdb:
+    image: couchdb:latest
+    restart: always
+    volumes:
+      - couchdb-data-volume:/usr/local/var/lib/couchdb:delegated
+      - ./data/couchdb/etc:/opt/couchdb/etc/local.d
+    environment:
+      - NODE_ENV=production
+      - COUCHDB_SERVER=http://user:pass@couchdb:5986
+      - COUCHDB_USER=user
+      - COUCHDB_PASSWORD=pass
+    ports:
+      - 5984:5984
+
+  particld1:
+    image: ludx/particl:0.18 # master # 0.16.2.0
+    volumes:
+      - ./data/particl1:/root/.particl:cached
+    ports:
+      - 52935:52935
+      - 52936:52936
+      - 52938:52938
+#    command: entrypoint.sh particld -reindex-chainstate
+    environment:
+      - CONF_TESTNET=1                 # Use the test chain
+      - CONF_RPCUSERNAME=test           # Username for JSON-RPC connections, generated unless set
+      - CONF_RPCPASSWORD=test           # Password for JSON-RPC connections, generated unless set
+#      - CONF_RPCPORT=52935
+      - CONF_PRINTTOCONSOLE=0           # Send trace/debug info to console instead of debug.log file
+#      - CONF_ONLYNET=onion              # Only connect to nodes in network: ipv4, ipv6 or onion
+#      - CONF_PROXY=127.0.0.1:9050       # Connect through SOCKS5 proxy
+#      - CONF_ONION=127.0.0.1:9050       # Use separate SOCKS5 proxy to reach peers via Tor hidden services (default: -proxy)
+      - CONF_SERVER=1                   # Accept command line and JSON-RPC commands
+#      - CONF_RPCALLOWIP=*
+      - CONF_RPCALLOWIP=0.0.0.0/0       # Allow JSON-RPC connections from specified source. Valid for <ip> are a single IP (e.g. 1.2.3.4), a network/netmask (e.g. 1.2.3.4/255.255.255.0) or a network/CIDR (e.g. 1.2.3.4/24).
+#      - CONF_REST=0                    # Accept public REST requests (default: 0)
+      - CONF_LISTEN=1                   # Accept connections from outside (default: 1 if no -proxy or -connect)
+#      - CONF_LISTENONION=1              # Automatically create Tor hidden service (default: 1)
+#      - CONF_TORCONTROL=127.0.0.1:9051  # Tor control port to use if onion listening enabled (default: 127.0.0.1:9051)
+#      - CONF_TORPASSWORD=particltor     # Tor control port password, generated unless set
+#      - CONF_DISCOVER=1                # Discover own IP address (default: 1 when listening and no -externalip)
+#      - CONF_BIND=127.0.0.1             # Bind to given address and always listen on it. Use [host]:port notation for IPv6
+#      - CONF_DEBUG=tor                    # Output debugging information: 0/1, addrman, alert, bench, cmpctblock, coindb, db, http, libevent, lock, mempool, mempoolrej, net, proxy, prune, rand, reindex, rpc, selectcoins, tor, zmq, qt.
+      - CREATEDEFAULTMASTERKEY=true
+
+volumes:
+  couchdb-data-volume:

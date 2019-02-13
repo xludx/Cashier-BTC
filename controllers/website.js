@@ -1,11 +1,3 @@
-/**
- * Cashier-BTC
- * -----------
- * Self-hosted bitcoin payment gateway
- *
- * https://github.com/Overtorment/Cashier-BTC
- *
- **/
 
 let express = require('express')
 let router = express.Router()
@@ -30,7 +22,7 @@ router.get('/generate_qr/:text', function (req, res) {
 })
 
 router.get('/', function (req, res) {
-  return res.status(200).send('Cashier-BTC reporting for duty')
+  return res.status(200).send('Cashier-PART reporting for duty')
 })
 
 router.use(function (req, res) {

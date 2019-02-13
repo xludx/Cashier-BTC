@@ -1,13 +1,11 @@
-Cashier-BTC
+Cashier-PART
 ===================
 
 v2 refactored and improved
 ---------------------------
 
-[![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://standardjs.com) Tests: [![CircleCI](https://circleci.com/gh/Overtorment/Cashier-BTC.svg?style=svg)](https://circleci.com/gh/Overtorment/Cashier-BTC)
-
 Self-hosted Node.js Bitcoin payment gateway. Provides REST API (microservice).
-Process Bitcoin payments on your end, securely, with no comission.
+Process Bitcoin payments on your end, securely, with no commission.
 
 Request payments (invoicing), check payments (whether invoice is paid), receive callbacks if payment is made.
 Aggregate funds on final (aggregational) address.
@@ -24,7 +22,7 @@ Installation
 ------------
 
 ```
-$ git clone https://github.com/Overtorment/Cashier-BTC && cd Cashier-BTC
+$ git clone https://github.com/Overtorment/Cashier-PART && cd Cashier-PART
 $ npm install
 $ cp config.js.dev config.js
 ```
@@ -48,12 +46,12 @@ Running
 -------
 
 ```
-$ nodejs cashier-btc.js
+$ nodejs cashier-part.js
 $ nodejs worker.js
 $ nodejs worker2.js
 ```
 
-Open [http://localhost:2222](http://localhost:2222) in browser, you should see 'Cashier-BTC reporting for duty'.
+Open [http://localhost:2222](http://localhost:2222) in browser, you should see 'Cashier-PART reporting for duty'.
 That's it, ready to use.
 Use tools like `supervisord` or `foreverjs` to keep it running.
 
@@ -92,7 +90,7 @@ API
 ### GET /request_payment/:expect/:currency/:message/:seller/:customer/:callback_url
 
 
-Create a request to pay, supported currencies: BTC, USD, EUR, TRY. Non-btc currency is converted to btc using current rate from coinbase.com spot api.
+Create a request to pay, supported currencies: PART, USD, EUR. Non-part currency is converted to part using current rate from XXX api.
 Returns a json document with QR code to be displayed to the payer, and a unique address for that particular payment (you can use it as invoice id).
 Message will be displayed to the client (for example, you can write "Payment for goods"). Seller and customer - system field, here you can
 write the application that created the request and the payer id. Keep Seller field private, it is also used for payouts.
@@ -100,7 +98,7 @@ Callback_url will be requested once the invoice is paid.
 
 	Example
 
-		http://localhost:2222/request_payment/0.005/BTC/wheres%20the%20money%20lebowski/treehorn/lebowski/http%3A%2F%2Fgoogle.com%2F
+		http://localhost:2222/request_payment/0.005/PART/wheres%20the%20money%20lebowski/iamseller/iambuyer/http%3A%2F%2Fgoogle.com%2F
 
 	Response
 
@@ -111,7 +109,7 @@ Callback_url will be requested once the invoice is paid.
 			"address" : "1DzJepHCRD2C9vpFjk11eXJi97juEZ3ftv"
 		}
 
-Link can be opened by the payer, there is a chance it will be handled by his bitcoin wallet.
+Link can be opened by the payer, there is a chance it will be handled by his particl wallet.
 QR shoud be shown to payer as well. Duplicate it with text, like, dear user, please pay the %expect% amount to %address%.
 
 ### GET /check_payment/:address
@@ -127,12 +125,12 @@ Check payment by a unique address received in the "request_payment" call.
 	Response
 
 		{
-			"btc_expected" : 0.0001009,
-			"btc_actual" : 0.0001009,
-			"btc_unconfirmed" : 0.0001009
+			"part_expected" : 0.0001009,
+			"part_actual" : 0.0001009,
+			"part_unconfirmed" : 0.0001009
 		}
 
-Using difference between "btc_expected" and "btc_actual" you can judge whether payment request (invoice) was paid.
+Using difference between "part_expected" and "part_actual" you can judge whether payment request (invoice) was paid.
 You can use this call to implement some kind of frontend animation which shows 'waiting for funds', and 
 polls periodically about the status of payment (i.e. unconfirmed incoming funds, paid in full/not in full).
 In case you accept unconfirmed balances (see `config.small_amount_threshhold`), you might want to check payment again before shipping actual goods.
@@ -144,14 +142,14 @@ In case you accept unconfirmed balances (see `config.small_amount_threshhold`), 
 
 
 Transfer funds from aggregated seller's address to some other address.
-Supported currencies: BTC.
+Supported currencies: PART.
 There's no additional sequrity here, it is presumed that the %seller% identifier is kept secret.
 You might want to disable this call for security reasons (or manually replace seller's address in 
 database with the one you control).
 
 	Example
 
-		http://localhost:2222/payout/new_test_seller/0.01/BTC/1MahZCousgNv6EAofCfi7Wpp2RKUfHH8uD
+		http://localhost:2222/payout/new_test_seller/0.01/PART/1MahZCousgNv6EAofCfi7Wpp2RKUfHH8uD
 
 	Response
 
@@ -183,28 +181,3 @@ This breaks the `/payout/` call, but at least the funds from orders will be forw
 Small risk remains with hot wallets still having their `WIFs` in the database, but this is a reality any other Bitcoin processor
 has to live in.
 
-Alternatives
-============
-
-Opensource alternatives
-----------------------
-
-* https://github.com/btcpayserver/btcpayserver
-* http://docs.electrum.org/en/latest/merchant.html
-* Your project here
-
-SaaS alternatives
------------------
-
-* https://coingate.com/accept-bitcoin
-* https://www.coinpayments.net
-* https://coinsbank.com/merchant
-* https://www.blockonomics.co/merchants#/page1
-* https://www.paybear.io
-* https://globee.com/
-* https://opennode.co/ (lightning)
-* https://strike.acinq.co/ (lightning)
-* ~~coinbase~~ crap
-* ~~bitpay~~ crap
-* ~~Coinify~~ crap
-* ~~Gocoin~~ crap

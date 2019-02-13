@@ -1,11 +1,3 @@
-/**
- * Cashier-BTC
- * -----------
- * Self-hosted bitcoin payment gateway
- *
- * https://github.com/Overtorment/Cashier-BTC
- *
- **/
 
 let request = require('request')
 let config = require('../config')

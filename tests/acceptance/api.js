@@ -18,7 +18,7 @@ describe('acceptance - loading express', function () {
   let server
 
   beforeEach(function () {
-    server = reRequire('../../cashier-btc')
+    server = reRequire('../../cashier-part')
   })
 
   afterEach(function (done) {
@@ -27,7 +27,7 @@ describe('acceptance - loading express', function () {
 
   it('responds to /request_payment/:expect/:currency/:message/:seller/:customer/:callback_url', function (done) {
     request(server)
-      .get('/request_payment/0.001/BTC/testmessage/testseller/testcustomer/http%3A%2F%2Ftesturl.com%2F')
+      .get('/request_payment/0.001/PART/testmessage/testseller/testcustomer/http%3A%2F%2Ftesturl.com%2F')
       .expect(function (res) {
         let json = JSON.parse(res.text)
         createdPayment = json
@@ -41,7 +41,7 @@ describe('acceptance - loading express', function () {
         rp.get(require('./../../config.js').couchdb + '/' + json.address).then((resultFromDb) => { // verifying in the database
           resultFromDb = JSON.parse(resultFromDb)
           expect(resultFromDb.address).to.equal(json.address)
-          expect(resultFromDb.btc_to_ask).to.equal(0.001)
+          expect(resultFromDb.part_to_ask).to.equal(0.001)
           expect(resultFromDb.seller).to.equal('testseller')
           expect(resultFromDb.doctype).to.equal('address')
           should.exist(resultFromDb.WIF)
@@ -60,7 +60,7 @@ describe('acceptance - loading express', function () {
 
   it('responds to duplicate /request_payment/:expect/:currency/:message/:seller/:customer/:callback_url', function (done) {
     request(server)
-      .get('/request_payment/0.001/BTC/testmessage/testseller/testcustomer/http%3A%2F%2Ftesturl.com%2F')
+      .get('/request_payment/0.001/PART/testmessage/testseller/testcustomer/http%3A%2F%2Ftesturl.com%2F')
       .expect(function (res) {
         let json = JSON.parse(res.text)
         createdPayment = json
@@ -74,7 +74,7 @@ describe('acceptance - loading express', function () {
         rp.get(require('./../../config.js').couchdb + '/' + json.address).then((resultFromDb) => { // verifying in the database
           resultFromDb = JSON.parse(resultFromDb)
           expect(resultFromDb.address).to.equal(json.address)
-          expect(resultFromDb.btc_to_ask).to.equal(0.001)
+          expect(resultFromDb.part_to_ask).to.equal(0.001)
           expect(resultFromDb.seller).to.equal('testseller')
           expect(resultFromDb.doctype).to.equal('address')
           should.exist(resultFromDb.WIF)
@@ -94,7 +94,7 @@ describe('acceptance - loading express', function () {
   it('creates new seller on /request_payment/:expect/:currency/:message/:seller/:customer/:callback_url', function (done) {
     let seller = 'testseller-' + Math.random().toString(36).replace(/[^a-z]+/g, '').substr(0, 5)
     request(server)
-      .get('/request_payment/0.001/BTC/testmessage/' + seller + '/testcustomer/http%3A%2F%2Ftesturl.com%2F')
+      .get('/request_payment/0.001/PART/testmessage/' + seller + '/testcustomer/http%3A%2F%2Ftesturl.com%2F')
       .expect(function (res) {
         let json = JSON.parse(res.text)
         createdPayment = json
@@ -108,7 +108,7 @@ describe('acceptance - loading express', function () {
         rp.get(require('./../../config.js').couchdb + '/' + json.address).then((resultFromDb) => { // verifying in the database
           resultFromDb = JSON.parse(resultFromDb)
           expect(resultFromDb.address).to.equal(json.address)
-          expect(resultFromDb.btc_to_ask).to.equal(0.001)
+          expect(resultFromDb.part_to_ask).to.equal(0.001)
           expect(resultFromDb.seller).to.equal(seller)
           expect(resultFromDb.doctype).to.equal('address')
           should.exist(resultFromDb.WIF)
@@ -128,7 +128,7 @@ describe('acceptance - loading express', function () {
   it('returns unprocessed documents ok', function (done) {
     let seller = 'testseller-' + Math.random().toString(36).replace(/[^a-z]+/g, '').substr(0, 5)
     request(server)
-      .get('/request_payment/0.001/BTC/testmessage/' + seller + '/testcustomer/http%3A%2F%2Ftesturl.com%2F')
+      .get('/request_payment/0.001/PART/testmessage/' + seller + '/testcustomer/http%3A%2F%2Ftesturl.com%2F')
       .expect(200, function () {
         let storage = require('../../models/storage')
         ;(async () => {
@@ -156,19 +156,19 @@ describe('acceptance - loading express', function () {
         if (!json) throw new Error('bad json')
         should.exist(json)
         json.should.be.an('object')
-        should.exist(json.btc_expected)
-        should.exist(json.btc_actual)
-        should.exist(json.btc_unconfirmed)
-        json.btc_expected.should.equal(0.001)
-        json.btc_actual.should.equal(0)
-        json.btc_unconfirmed.should.equal(0)
+        should.exist(json.part_expected)
+        should.exist(json.part_actual)
+        should.exist(json.part_unconfirmed)
+        json.part_expected.should.equal(0.001)
+        json.part_actual.should.equal(0)
+        json.part_unconfirmed.should.equal(0)
       })
       .expect(200, done)
   })
 
   it('responds to /payout/:seller/:amount/:currency/:address', function testSlash (done) {
     request(server)
-      .get('/payout/testseller/0.66/BTC/1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa') // satoshi's address from block#0
+      .get('/payout/testseller/0.66/PART/1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa') // satoshi's address from block#0
       .expect(function (res) {
         let json = JSON.parse(res.text)
         should.exist(json.error) // not enough balance

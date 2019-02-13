@@ -1,28 +1,21 @@
-/**
- * Cashier-BTC
- * -----------
- * Self-hosted bitcoin payment gateway
- *
- * https://github.com/Overtorment/Cashier-BTC
- *
- **/
 
-let bitcore = require('bitcore-lib')
-let bitcoinjs = require('bitcoinjs-lib')
-let config = require('../config')
+let bitcore = require('particl-bitcore-lib');
+let bitcoinjs = require('bitcoinjs-lib-particl');
+let config = require('../config');
+const logger = require('../utils/logger').logger;
 
 // this function and bitcore-lib are kept for backward compatibility
 // TODO: rewrite on bitcoinjs or remove completely
 exports.createTransaction = function (utxos, toAddress, amount, fixedFee, WIF, changeAddress) {
-  amount = parseInt((amount * 100000000).toFixed(0))
-  fixedFee = parseInt((fixedFee * 100000000).toFixed(0))
+  amount = parseInt((amount * 100000000).toFixed(0));
+  fixedFee = parseInt((fixedFee * 100000000).toFixed(0));
 
-  let pk = new bitcore.PrivateKey.fromWIF(WIF) // eslint-disable-line new-cap
-  let fromAddress = (pk.toPublicKey()).toAddress(bitcore.Networks.livenet)
+  let pk = new bitcore.PrivateKey.fromWIF(WIF); // eslint-disable-line new-cap
+  let fromAddress = (pk.toPublicKey()).toAddress(bitcore.Networks.livenet);
 
-  changeAddress = changeAddress || fromAddress
+  changeAddress = changeAddress || fromAddress;
 
-  let transaction = new bitcore.Transaction()
+  let transaction = new bitcore.Transaction();
 
   for (const utxo of utxos) {
     transaction.from({
@@ -32,7 +25,7 @@ exports.createTransaction = function (utxos, toAddress, amount, fixedFee, WIF, c
       'scriptPubKey': utxo.scriptPubKey,
       'satoshis': parseInt((utxo.amount * 100000000).toFixed(0))
 
-    })
+    });
   }
 
   transaction
@@ -41,7 +34,7 @@ exports.createTransaction = function (utxos, toAddress, amount, fixedFee, WIF, c
     .change(changeAddress)
     .sign(pk)
 
-  return transaction.uncheckedSerialize()
+  return transaction.uncheckedSerialize();
 }
 
 exports.createSegwitTransaction = function (utxos, toAddress, amount, fixedFee, WIF, changeAddress, sequence) {
@@ -131,27 +124,30 @@ exports.createRBFSegwitTransaction = function (txhex, addressReplaceMap, feeDelt
 }
 
 exports.generateNewSegwitAddress = function () {
-  let keyPair = bitcoinjs.ECPair.makeRandom()
-  let pubKey = keyPair.getPublicKeyBuffer()
 
-  let witnessScript = bitcoinjs.script.witnessPubKeyHash.output.encode(bitcoinjs.crypto.hash160(pubKey))
-  let scriptPubKey = bitcoinjs.script.scriptHash.output.encode(bitcoinjs.crypto.hash160(witnessScript))
-  let address = bitcoinjs.address.fromOutputScript(scriptPubKey)
+    let network = config.testnet ? bitcoinjs.networks.particl_testnet : bitcoinjs.networks.particl;
+    let keyPair = bitcoinjs.ECPair.makeRandom({ network });
+    let address = keyPair.getAddress();
 
-  if (config.testnet) {
-    let testnet = bitcoinjs.networks.testnet
-    keyPair = bitcoinjs.ECPair.makeRandom({ network: testnet })
-    address = keyPair.getAddress()
-  }
+    // let pubKey = keyPair.getPublicKeyBuffer();
+    // let witnessScript = bitcoinjs.script.witnessPubKeyHash.output.encode(bitcoinjs.crypto.hash160(pubKey));
+    // let scriptPubKey = bitcoinjs.script.scriptHash.output.encode(bitcoinjs.crypto.hash160(witnessScript));
+    // let address = bitcoinjs.address.fromOutputScript(scriptPubKey);
 
-  return {
-    'address': address,
-    'WIF': keyPair.toWIF()
-  }
+    logger.debug('generateNewSegwitAddress(), address: ' + address);
+
+    return {
+        'address': address,
+        'WIF': keyPair.toWIF()
+    };
+}
+
+exports.isAddressValid = function (address) {
+  return bitcore.Address.isValid(address)
 }
 
 exports.URI = function (paymentInfo) {
-  let uri = 'bitcoin:'
+  let uri = 'particl:'
   uri += paymentInfo.address
   uri += '?amount='
   uri += parseFloat((paymentInfo.amount / 100000000))

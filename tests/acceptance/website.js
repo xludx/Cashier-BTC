@@ -13,7 +13,7 @@ describe('acceptance - loading express', function () {
   let server
 
   beforeEach(function () {
-    server = reRequire('../../cashier-btc')
+    server = reRequire('../../cashier-part')
   })
 
   afterEach(function (done) {
@@ -23,7 +23,7 @@ describe('acceptance - loading express', function () {
   it('responds to /', function (done) {
     request(server)
             .get('/')
-            .expect('Cashier-BTC reporting for duty')
+            .expect('Cashier-PART reporting for duty')
             .expect(200, done)
   })
 

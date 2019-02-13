@@ -1,16 +1,8 @@
-/**
- * Cashier-BTC
- * -----------
- * Self-hosted bitcoin payment gateway
- *
- * https://github.com/Overtorment/Cashier-BTC
- *
- **/
 
 let config = require('../config')
 let jayson = require('jayson/promise')
 let url = require('url')
-let rpc = url.parse(config.bitcoind.rpc)
+let rpc = url.parse(config.particld.rpc)
 rpc.timeout = 5000
 let client = jayson.client.http(rpc)
 
@@ -32,7 +24,8 @@ function getblockchaininfo () {
 }
 
 function listunspent (address) {
-  return client.request('listunspent', [0, 9999999, [address], true])
+  // minconf, maxconf, [addresses], include_unsafe, query_options
+  return client.request('listunspent', [0, 9999999, [address], false])
 }
 
 function getTransactionInfo (txid) {

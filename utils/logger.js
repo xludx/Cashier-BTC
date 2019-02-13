@@ -11,6 +11,7 @@ let winston = require('winston')
 let createLogger = winston.createLogger
 let format = winston.format
 let transports = winston.transports
+let config = require('../config')
 
 /* + + + + + + + + + + + + + + + + + + + + +
 // Start
@@ -20,22 +21,33 @@ const {
   timestamp,
   printf
 } = format
-const logFormat = printf(info => {
-  return `${info.timestamp} : ${info.level}: [${info.label}] : ${info.message}`
+
+const myFormat = printf(info => {
+  return `${info.timestamp} : ${info.level} : ${info.message}`
 })
+
 const logger = createLogger({
-  level: 'info',
+  level: config.logging_level,
   format: combine(
     timestamp(),
-    logFormat
-  ),
+    myFormat
+  ), // winston.format.json(),
   transports: [
+    // - Write to all logs with level `info` and below to `combined.log`
+    // - Write all logs error (and below) to `error.log`.
+    // or new transports.Console()
     new transports.File({
       filename: './logs/error.log',
+      maxsize: 52428800,
       level: 'error'
     }),
     new transports.File({
-      filename: './logs/out.log'
+      filename: './logs/combined.log',
+      maxsize: 52428800
+    }),
+    new transports.Console({
+      timestamp: true,
+      colorize: true
     })
   ]
 })
@@ -76,3 +88,4 @@ function error (label, message) {
 
 exports.log = log
 exports.error = error
+exports.logger = logger

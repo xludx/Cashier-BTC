@@ -1,18 +1,27 @@
 {
-  "name": "Cashier-BTC",
-  "version": "2.1.0",
-  "description": "Self-hosted bitcoin payment gateway",
-  "main": "cashier-btc.js",
-  "repository": "https://github.com/Overtorment/Cashier-BTC",
+  "name": "cashier-part",
+  "version": "2.2.0",
+  "description": "Self-hosted particl payment gateway",
+  "main": "cashier-part.js",
+  "repository": "https://github.com/xludx/cashier-part",
   "license": "WTFPL",
-  "author": "Igor Korsakov",
+  "author": "Juha Kovanen",
   "scripts": {
-    "postinstall": "mkdir qr && chmod 777 qr && mkdir logs && chmod 777 logs",
+    "lint": "eslint ./*.js --fix",
+    "postinstall": "mkdir -p qr && chmod 777 qr && mkdir -p logs && chmod 777 logs",
     "test": "nodejs ./node_modules/.bin/standard && nodejs ./node_modules/.bin/mocha --exit tests/*",
-    "clean": "rm -r -f ./node_modules/ && rm -r -f ./qr/"
+    "clean": "rm -r -f ./node_modules/ && rm -r -f ./qr/",
+    "copy-config-local": "cp config.js.local config.js",
+    "copy-config-docker": "cp config.js.docker config.js",
+    "start-cashier": "node cashier-part.js",
+    "start-worker-1": "node worker.js",
+    "start-worker-2": "node worker2.js",
+    "serve": "npm-run-all -p -r start-cashier start-worker-1 start-worker-2",
+    "serve:local": "npm run copy-config-local && npm run serve",
+    "serve:docker": "npm run copy-config-docker && npm run serve"
   },
   "dependencies": {
-    "bitcoinjs-lib": "^3.3.0",
+    "bitcoinjs-lib-particl": "3.3.2",
     "bitcore-lib": "0.15.0",
     "body-parser": "^1.18.2",
     "chai": "^4.1.2",
@@ -21,13 +30,19 @@
     "mocha": "^4.0.1",
     "morgan": "^1.9.0",
     "node-uuid": "^1.4.8",
+    "particl-bitcore-lib": "^0.16.0",
     "qr-image": "^3.2.0",
     "request": "^2.83.0",
     "request-promise": "^4.2.2",
     "rewire": "^2.5.2",
     "sinon": "^4.1.2",
-    "standard": "^8.6.0",
     "supertest": "^3.0.0",
     "winston": "^3.0.0"
+  },
+  "devDependencies": {
+    "eslint": "^5.13.0",
+    "eslint-config-airbnb-base": "^13.1.0",
+    "eslint-plugin-import": "^2.16.0",
+    "npm-run-all": "^4.1.5"
   }
 }

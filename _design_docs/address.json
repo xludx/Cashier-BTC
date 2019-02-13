@@ -1,6 +1,6 @@
 {
     "_id": "_design\/address",
-    "comment": "ADDRESS represents single bitcoin invoice. Its a unique generated address that awaits certain amount of btc. Once it receives this amount - it changes status and fires callback url",
+    "comment": "ADDRESS represents single particl invoice. Its a unique generated address that awaits certain amount of part. Once it receives this amount - it changes status and fires callback url",
     "views": {
         "all_by_customer_and_timestamp": {
             "map": "function(doc) {\n  if (doc.doctype=='address' && doc.timestamp && doc.customer) {\n               emit(doc.customer + \"-\" + doc.timestamp, doc.processed);\n  }\n}"
@@ -15,7 +15,7 @@
             "map": "function(doc) {\n  if (doc.doctype=='address' && doc.timestamp && (doc.processed=='paid_and_sweeped')) {\n               emit(doc.timestamp, new Date( doc.timestamp ).toISOString().replace('T', ' '));\n  }\n}"
         },
         "total_by_seller": {
-            "map": "function(doc) {\n  if (doc.doctype=='address' && doc.processed=='paid_and_sweeped' && !doc.is_test) {\n               emit(doc.seller, doc.btc_to_ask);\n  }\n}",
+            "map": "function(doc) {\n  if (doc.doctype=='address' && doc.processed=='paid_and_sweeped' && !doc.is_test) {\n               emit(doc.seller, doc.part_to_ask);\n  }\n}",
             "reduce": "function(key, values, rereduce) {\n  return sum(values);   \n}"
         }
     },

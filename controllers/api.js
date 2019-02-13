@@ -1,59 +1,32 @@
-/**
- * Cashier-BTC
- * -----------
- * Self-hosted bitcoin payment gateway
- *
- * License: WTFPL
- * Author: Igor Korsakov
- * */
 
 /**
  *
- * Handles all bitcoin payment gateway API calls
- * I.e. all calls responsible for invoicing and paying in BTC only
+ * Handles all particl payment gateway API calls
+ * I.e. all calls responsible for invoicing and paying in PART only
  *
  */
 
 /* global exchanges */
 
-let express = require('express')
-let router = express.Router()
-let config = require('../config')
-let blockchain = require('../models/blockchain')
-let storage = require('../models/storage')
-let signer = require('../models/signer')
-
-const { createLogger, format, transports } = require('winston')
-const { combine, timestamp, printf } = format
-
-const myFormat = printf(info => {
-  return `${info.timestamp} ${info.level}: ${info.message}`
-})
-
-const logger = createLogger({
-  level: config.logging_level,
-  format: combine(
-    timestamp(),
-    myFormat
-  ), // winston.format.json(),
-  transports: [
-    //
-    // - Write to all logs with level `info` and below to `combined.log`
-    // - Write all logs error (and below) to `error.log`.
-    // or new transports.Console()
-    new transports.File({ filename: './logs/error.log', level: 'error' }),
-    new transports.File({ filename: './logs/combined.log' })
-  ]
-})
+const express = require('express')
+const router = express.Router()
+const config = require('../config')
+const blockchain = require('../models/blockchain')
+const storage = require('../models/storage')
+const signer = require('../models/signer')
+const logger = require('../utils/logger').logger
 
 router.get('/request_payment/:expect/:currency/:message/:seller/:customer/:callback_url', function (req, res) {
-  let exchangeRate, btcToAsk, satoshiToAsk
+  let exchangeRate, partToAsk, satoshiToAsk
 
-  if (undefined === typeof exchanges[req.params.currency]) return res.send(JSON.stringify({'error': 'bad currency'}))
-  else exchangeRate = exchanges[req.params.currency]
+  if (undefined === typeof exchanges[req.params.currency]) {
+    return res.send(JSON.stringify({'error': 'bad currency'}))
+  } else {
+    exchangeRate = exchanges[req.params.currency]
+  }
 
   satoshiToAsk = Math.floor((req.params.expect / exchangeRate) * 100000000)
-  btcToAsk = satoshiToAsk / 100000000
+  partToAsk = satoshiToAsk / 100000000
 
   let address = signer.generateNewSegwitAddress()
 
@@ -62,7 +35,7 @@ router.get('/request_payment/:expect/:currency/:message/:seller/:customer/:callb
     'expect': req.params.expect,
     'currency': req.params.currency,
     'exchange_rate': exchangeRate,
-    'btc_to_ask': btcToAsk,
+    'part_to_ask': partToAsk,
     'message': req.params.message,
     'seller': req.params.seller,
     'customer': req.params.customer,
@@ -109,7 +82,7 @@ router.get('/request_payment/:expect/:currency/:message/:seller/:customer/:callb
       logger.warn(req.id + ' seller already exists')
     }
 
-    logger.info(req.id + ' created address' + addressData.address)
+    logger.info(req.id + ' created address: ' + addressData.address)
     await storage.saveAddressPromise(addressData)
     await blockchain.importaddress(addressData.address)
 
@@ -130,11 +103,11 @@ router.get('/check_payment/:address', function (req, res) {
     let received = values[0]
     let addressJson = values[1]
 
-    if (addressJson && addressJson.btc_to_ask && addressJson.doctype === 'address') {
+    if (addressJson && addressJson.part_to_ask && addressJson.doctype === 'address') {
       let answer = {
-        'btc_expected': addressJson.btc_to_ask,
-        'btc_actual': received[1].result,
-        'btc_unconfirmed': received[0].result
+        'part_expected': addressJson.part_to_ask,
+        'part_actual': received[1].result,
+        'part_unconfirmed': received[0].result
       }
       res.send(JSON.stringify(answer))
     } else {
@@ -146,13 +119,13 @@ router.get('/check_payment/:address', function (req, res) {
 
 router.get('/payout/:seller/:amount/:currency/:address', async function (req, res) {
   logger.debug('received payout request for seller ' + req.params.seller + ' to ' + req.params.address + ' of ' + req.params.amount + ' ' + req.params.currency)
-  if (req.params.currency !== 'BTC') {
+  if (req.params.currency !== 'PART') {
     logger.warn('payout failed. currency error.')
     return res.send(JSON.stringify({'error': 'bad currency'}))
   }
 
   try {
-    let btcToPay = req.params.amount
+    let partToPay = req.params.amount
     let seller = await storage.getSellerPromise(req.params.seller)
     if (seller === false || typeof seller.error !== 'undefined') {
       logger.warn('payout failed. seller error.')
@@ -167,21 +140,21 @@ router.get('/payout/:seller/:amount/:currency/:address', async function (req, re
       }
     }
 
-    if (amount >= btcToPay) { // balance is ok
+    if (amount >= partToPay) { // balance is ok
       let unspentOutputs = await blockchain.listunspent(seller.address)
-      logger.info(req.id + ' sending ' + btcToPay + ' from ' + req.params.seller + '(' + seller.address + ') to ' + req.params.address)
+      logger.info(req.id + ' sending ' + partToPay + ' from ' + req.params.seller + '(' + seller.address + ') to ' + req.params.address)
       let createTx = signer.createTransaction
       if (seller.address[0] === '3') {
         // assume source address is SegWit P2SH
         createTx = signer.createSegwitTransaction
       }
-      let tx = createTx(unspentOutputs.result, req.params.address, btcToPay, 0.0001, seller.WIF, seller.address)
+      let tx = createTx(unspentOutputs.result, req.params.address, partToPay, 0.0001, seller.WIF, seller.address)
       logger.info(req.id + ' broadcasting ' + tx)
       let broadcastResult = await blockchain.broadcastTransaction(tx)
       logger.info(req.id + ' broadcast result: ' + JSON.stringify(broadcastResult))
       let data = {
         'seller': req.params.seller,
-        'btc': btcToPay,
+        'part': partToPay,
         'tx': tx,
         'transaction_result': broadcastResult,
         'to_address': req.params.address,
@@ -230,7 +203,7 @@ router.get('/get_exchange/:toCurrency', function (req, res) {
   satoshiRate = exchangeRate / 100000000
 
   let response = {
-    'from': 'BTC',
+    'from': 'PART',
     'to': req.params.toCurrency,
     'rate': exchangeRate,
     'satoshiRate': satoshiRate
