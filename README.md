@@ -3,7 +3,8 @@ cashier-part
 
 Based on [Cashier-BTC](https://github.com/Overtorment/Cashier-BTC).
 
-This software is still Work-In-Progress and should not be used in production.
+This software is still very much WIP, use at your own risk.
+
 
 v2 refactored and improved
 ---------------------------
@@ -26,7 +27,8 @@ Installation
 ------------
 
 ```
-$ git clone git@github.com:xludx/cashier-part.git && cd cashier-part
+$ git clone git@github.com:xludx/cashier-part.git
+$ cd cashier-part
 $ npm install
 ```
 
@@ -49,16 +51,6 @@ $ docker-compose up
 Open [http://localhost:2222](http://localhost:2222) in browser, you should see 'cashier-part reporting for duty'.
 That's it, ready to use.
 
-License
--------
-
-[WTFPL](http://www.wtfpl.net/txt/copying/)
-
-Author
-------
-
-Juha Kovanen
-
 
 TODO
 ----
@@ -77,6 +69,8 @@ TODO
 * [ ] Flexible (user-defined?) fees
 * [ ] BigNumber lib for all numbers handling
 * [ ] Add support for multiple cryptocurrencies
+* [ ] Use typescript
+
 
 
 API

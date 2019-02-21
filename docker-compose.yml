@@ -11,7 +11,7 @@ services:
       - ./data/app1:/app/data:delegated
       - ./data/app1_node_modules:/app/node_modules:delegated
     ports:
-      - 3100:3100
+      - 2222:2222
     command: bin/entrypoint.sh
     links:
       - particld1
@@ -42,9 +42,9 @@ services:
     volumes:
       - ./data/particl1:/root/.particl:cached
     ports:
-      - 52935:52935
-      - 52936:52936
-      - 52938:52938
+      - 59935:52935
+      - 59936:52936
+      - 59938:52938
 #    command: entrypoint.sh particld -reindex-chainstate
     environment:
       - CONF_TESTNET=1                 # Use the test chain
