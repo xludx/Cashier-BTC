@@ -1,18 +1,22 @@
-Cashier-PART
-===================
+cashier-part
+============
+
+Based on [Cashier-BTC](https://github.com/Overtorment/Cashier-BTC).
+
+This software is still Work-In-Progress and should not be used in production.
 
 v2 refactored and improved
 ---------------------------
 
-Self-hosted Node.js Bitcoin payment gateway. Provides REST API (microservice).
-Process Bitcoin payments on your end, securely, with no commission.
+Self-hosted Node.js Particl payment gateway. Provides REST API (microservice).
+Process Particl payments on your end, securely, with no commission.
 
 Request payments (invoicing), check payments (whether invoice is paid), receive callbacks if payment is made.
 Aggregate funds on final (aggregational) address.
-Depends on Nodejs v8+, Bitcoin Core, Couchdb for storage.
+Depends on Nodejs v8+, Particl Core, Couchdb for storage.
 
 * Simple
-* No 3rd parties (works though Bitcoin Core node)
+* No 3rd parties (works though Particl Core node)
 * Transactions are signed locally. No private keys leak
 * Battle-tested in production
 * SegWit compatible
@@ -22,18 +26,10 @@ Installation
 ------------
 
 ```
-$ git clone https://github.com/Overtorment/Cashier-PART && cd Cashier-PART
+$ git clone https://github.com/Overtorment/cashier-part && cd cashier-part
 $ npm install
-$ cp config.js.dev config.js
 ```
 
-* Install [Bitcoin Core](BITCOIN-CORE-INSTALL.md)
-* Install Couchdb (or use [https://cloudant.com](https://cloudant.com))
-
-Edit `config.js`:
-
-* Point it to a new Couchdb database
-* Point it to a Bitcoin Core RPC server
 
 Tests
 -----
@@ -45,13 +41,12 @@ $ npm test
 Running
 -------
 
+Run the app using docker-compose:
 ```
-$ nodejs cashier-part.js
-$ nodejs worker.js
-$ nodejs worker2.js
+$ docker-compose up
 ```
 
-Open [http://localhost:2222](http://localhost:2222) in browser, you should see 'Cashier-PART reporting for duty'.
+Open [http://localhost:2222](http://localhost:2222) in browser, you should see 'cashier-part reporting for duty'.
 That's it, ready to use.
 Use tools like `supervisord` or `foreverjs` to keep it running.
 
@@ -63,7 +58,7 @@ License
 Author
 ------
 
-Igor Korsakov
+Juha Kovanen
 
 
 TODO
@@ -99,7 +94,7 @@ Callback_url will be requested once the invoice is paid.
 	Example
 
 		http://localhost:2222/request_payment/0.005/PART/wheres%20the%20money%20lebowski/iamseller/iambuyer/http%3A%2F%2Fgoogle.com%2F
-
+        http://localhost:2222/request_payment/0.005/PART/wheresmymoney/iamseller/iambuyer/http%3A%2F%2Fgoogle.com
 	Response
 
 		{

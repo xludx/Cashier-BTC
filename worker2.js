@@ -17,7 +17,7 @@ require('./smoke-test');
   while (1) {
     logger.debug('worker2.js' + ' tick tock');
     const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
-    await storage.getUnprocessedAdressesNewerThanPromise(Date.now() - config.process_unpaid_for_period)
+    await storage.getPaidAdressesNewerThanPromise(Date.now() - config.process_unpaid_for_period)
       .then(async (job) => {
         logger.info(`worker2 js found ${job.rows.length} records`);
         await processJob(job);

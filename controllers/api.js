@@ -107,7 +107,7 @@ router.get('/check_payment/:address', function (req, res) {
       let answer = {
         'part_expected': addressJson.part_to_ask,
         'part_actual': received[1].result,
-        'part_unconfirmed': received[0].result
+        'part_unconfirmed': addressJson.part_to_ask - received[0].result
       }
       res.send(JSON.stringify(answer))
     } else {
