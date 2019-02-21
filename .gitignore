@@ -5,3 +5,4 @@ logs/
 .idea
 data/
 .DS_Store
+*.log
