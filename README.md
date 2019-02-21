@@ -26,7 +26,7 @@ Installation
 ------------
 
 ```
-$ git clone https://github.com/Overtorment/cashier-part && cd cashier-part
+$ git clone git@github.com:xludx/cashier-part.git && cd cashier-part
 $ npm install
 ```
 
@@ -48,7 +48,6 @@ $ docker-compose up
 
 Open [http://localhost:2222](http://localhost:2222) in browser, you should see 'cashier-part reporting for duty'.
 That's it, ready to use.
-Use tools like `supervisord` or `foreverjs` to keep it running.
 
 License
 -------
@@ -77,6 +76,7 @@ TODO
 * [x] ~~SegWit~~
 * [ ] Flexible (user-defined?) fees
 * [ ] BigNumber lib for all numbers handling
+* [ ] Add support for multiple cryptocurrencies
 
 
 API
